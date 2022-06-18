@@ -324,7 +324,7 @@ function drawDisplayPixels(array $PixelRows): void
 
     }
 
-//drawSplashScreen($splashScreenPixelRows);
+drawSplashScreen($splashScreenPixelRows);
 
 
 $gamePixelRows = drawInfo($gamePixelRows, (string)$balance, (string)$creditsWon, (string)$bet );
