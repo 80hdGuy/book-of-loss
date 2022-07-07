@@ -2,33 +2,37 @@
 
 $splashScreenPixelRows = file("splashImage.txt");
 
+const IS_PC_FAST = false;
+
 function drawSplashScreen($splashScreenPixelRows): void
 {
-    for ($i = 0; $i < count($splashScreenPixelRows); $i++){
+    for ($i = 0; $i < count($splashScreenPixelRows); $i++) {
 
-        $textArr = substr($splashScreenPixelRows[$i],0, -1);
+        $textArr = substr($splashScreenPixelRows[$i], 0, -1);
         $splashScreenPixelRows[$i] =
-            array_merge( array_fill(0, leftPadding," "), str_split($textArr));
+            array_merge(array_fill(0, leftPadding, " "), str_split($textArr));
     }
     $frameCounter = 1;
 
-    while ($frameCounter < count($splashScreenPixelRows[0]) - 1){
-        usleep(10000);
+    while ($frameCounter < count($splashScreenPixelRows[0]) - 1) {
+        if (IS_PC_FAST) {
+            usleep(10000);
+        }
         system("clear");
-        foreach ($splashScreenPixelRows as $pixelRow){
+
+        foreach ($splashScreenPixelRows as $pixelRow) {
 
             $stringToDraw = implode("",
-                    array_slice($pixelRow,count($splashScreenPixelRows[0]) - 1 - $frameCounter)) . PHP_EOL;
+                    array_slice($pixelRow, count($splashScreenPixelRows[0]) - 1 - $frameCounter)) . PHP_EOL;
             echo $stringToDraw;
         }
         $frameCounter++;
     }
-     sleep(3);
+    sleep(3);
 }
 
-$gamePixelRows = array_fill(0,26,array_fill(0,100," "));
+$gamePixelRows = array_fill(0, 26, array_fill(0, 100, " "));
 
-//game logic
 $balance = 0.0;
 $creditsWon = 0;
 $bet = 0;
@@ -116,51 +120,56 @@ const fruitsTypes = [
 const leftPadding = 10;
 const seedRoof = 30;
 $gameMatrix = [
-    [1,1,1,1,1],
-    [2,2,2,2,2],
-    [3,3,3,3,3]
+    [1, 1, 1, 1, 1],
+    [2, 2, 2, 2, 2],
+    [3, 3, 3, 3, 3]
 ];
 
 const comboLines = [
-    [[1,0],[1,1],[1,2],[1,3],[1,4]],
-    [[0,0],[0,1],[0,2],[0,3],[0,4]],
-    [[2,0],[2,1],[2,2],[2,3],[2,4]],
-    [[0,0],[1,1],[2,2],[1,3],[0,4]],
-    [[2,0],[1,1],[0,2],[1,3],[2,4]],
-    [[1,0],[2,1],[2,2],[2,3],[1,4]],
-    [[1,0],[0,1],[0,2],[0,3],[1,4]],
-    [[2,0],[2,1],[1,2],[0,3],[0,4]],
-    [[0,0],[0,1],[1,2],[2,3],[2,4]],
-    [[2,0],[1,1],[1,2],[1,3],[0,4]]
+    [[1, 0], [1, 1], [1, 2], [1, 3], [1, 4]],
+    [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]],
+    [[2, 0], [2, 1], [2, 2], [2, 3], [2, 4]],
+    [[0, 0], [1, 1], [2, 2], [1, 3], [0, 4]],
+    [[2, 0], [1, 1], [0, 2], [1, 3], [2, 4]],
+    [[1, 0], [2, 1], [2, 2], [2, 3], [1, 4]],
+    [[1, 0], [0, 1], [0, 2], [0, 3], [1, 4]],
+    [[2, 0], [2, 1], [1, 2], [0, 3], [0, 4]],
+    [[0, 0], [0, 1], [1, 2], [2, 3], [2, 4]],
+    [[2, 0], [1, 1], [1, 2], [1, 3], [0, 4]]
 ];
 
 
-function shuffleGameMatrix(array $gameMatrix, array $gamePixelRows): array{
-    $randomSeeds = array_fill(0,count($gameMatrix[0]),0);
-    $randomSeeds = array_map(fn() => rand(1, seedRoof),$randomSeeds);
-    for ($i = 0; $i < count($randomSeeds); $i++){
+function shuffleGameMatrix(array $gameMatrix, array $gamePixelRows): array
+{
+    $randomSeeds = array_fill(0, count($gameMatrix[0]), 0);
+    $randomSeeds = array_map(fn() => rand(1, seedRoof), $randomSeeds);
+    for ($i = 0; $i < count($randomSeeds); $i++) {
 
-        for ($j = 0; $j < $randomSeeds[$i]; $j++){
+        for ($j = 0; $j < $randomSeeds[$i]; $j++) {
 
 
-            $gamePixelRows = drawGameMatrix($gameMatrix,$gamePixelRows,false,$i);//
+            $gamePixelRows = drawGameMatrix($gameMatrix, $gamePixelRows, false, $i);//
             drawDisplayPixels($gamePixelRows);//
-            usleep(20000);
+            if (IS_PC_FAST) {
+                usleep(20000);
+            }
             system("clear");
             $halfRow = false;//
-            for ($k = 0; $k < count($gameMatrix); $k++){
-                if($gameMatrix[$k][$i] == count(fruitsTypes) - 1){
+            for ($k = 0; $k < count($gameMatrix); $k++) {
+                if ($gameMatrix[$k][$i] == count(fruitsTypes) - 1) {
                     $gameMatrix[$k][$i] = 0;
-                }else{
+                } else {
                     $gameMatrix[$k][$i]++;
                 }
-                $gamePixelRows = drawGameMatrix($gameMatrix,$gamePixelRows,$halfRow,$i);//
+                $gamePixelRows = drawGameMatrix($gameMatrix, $gamePixelRows, $halfRow, $i);//
                 drawDisplayPixels($gamePixelRows);//
                 $halfRow = false;//
-                usleep(20000);
+                if (IS_PC_FAST) {
+                    usleep(20000);
+                }
                 system("clear");
             }
-            $gamePixelRows = drawGameMatrix($gameMatrix,$gamePixelRows,false,$i);//
+            $gamePixelRows = drawGameMatrix($gameMatrix, $gamePixelRows, false, $i);//
             drawDisplayPixels($gamePixelRows);//
         }
 
@@ -169,41 +178,40 @@ function shuffleGameMatrix(array $gameMatrix, array $gamePixelRows): array{
     return $gameMatrix;
 }
 
-function getWinnings(int $bet, array $shuffledMatrix, int $lineCount): int {
+function getWinnings(int $bet, array $shuffledMatrix, int $lineCount): int
+{
     $winnings = 0;
     $lineCount = count(comboLines) - (count(comboLines) - $lineCount);
 
 
-
-
-    for ($i = 0; $i < $lineCount; $i++){
+    for ($i = 0; $i < $lineCount; $i++) {
         $fruitsInLine = [];
         $equalFruitsInLine = [];
         $specialFruitCount = 0;
         $mainFruitCount = 0;
-        for ($j = 0; $j < count(comboLines[0]); $j++){
+        for ($j = 0; $j < count(comboLines[0]); $j++) {
             $fruitsInLine[] = $shuffledMatrix[comboLines[$i][$j][0]][comboLines[$i][$j][1]];
         }
         $mainFruit = -1;
-        for ($j = 0; $j < count($fruitsInLine); $j++){
+        for ($j = 0; $j < count($fruitsInLine); $j++) {
             if ($mainFruit == -1 && !in_array($fruitsInLine[$j], specialFruits)) {
                 $mainFruit = $fruitsInLine[$j];
                 $equalFruitsInLine[] = $fruitsInLine[$j];
-            }else if($mainFruit == $fruitsInLine[$j] || in_array($fruitsInLine[$j], specialFruits)){
+            } else if ($mainFruit == $fruitsInLine[$j] || in_array($fruitsInLine[$j], specialFruits)) {
                 $equalFruitsInLine[] = $fruitsInLine[$j];
-            }else{
+            } else {
                 break;
             }
 
         }
-        foreach ($equalFruitsInLine as $fruit){
-            if(in_array($fruit,specialFruits)){
+        foreach ($equalFruitsInLine as $fruit) {
+            if (in_array($fruit, specialFruits)) {
                 $specialFruitCount++;
                 continue;
             }
-                $mainFruitCount++;
+            $mainFruitCount++;
         }
-        switch (true){
+        switch (true) {
             case $mainFruitCount == 3:
                 $winnings += $bet * 0.5;
                 break;
@@ -231,27 +239,28 @@ function getWinnings(int $bet, array $shuffledMatrix, int $lineCount): int {
     return $winnings;
 }
 
-function drawGameMatrix(array $gameMatrix ,array $GamePixelRows,bool $halfRow, int $columnIndex): array{
+function drawGameMatrix(array $gameMatrix, array $GamePixelRows, bool $halfRow, int $columnIndex): array
+{
     //clear screen
     //for ($i = 1; $i < 16; $i++){
     //    for ($j = 21; $j < 79; $j++){
     //        $GamePixelRows[$i][$j] = " ";
     //    }
     //}
-    $jSeparator = intdiv(count($GamePixelRows[0])-40,5) ;
-    $iSeparator = intdiv(count($GamePixelRows)-7,3);
+    $jSeparator = intdiv(count($GamePixelRows[0]) - 40, 5);
+    $iSeparator = intdiv(count($GamePixelRows) - 7, 3);
 
     $endPadding = -1;//$columnIndex == -1? 0 : ((4- $columnIndex ) * 9);
     $startPadding = -1;//$columnIndex == -1? 0 : ($columnIndex * 9);
     $gameMatrixRowCounter = 0;
-    for ($i = ($halfRow? 4: 1); $i < (count($GamePixelRows) - ($halfRow? 15 : 9)); $i = $iSeparator + $i ){
+    for ($i = ($halfRow ? 4 : 1); $i < (count($GamePixelRows) - ($halfRow ? 15 : 9)); $i = $iSeparator + $i) {
 
-        for ($l = 0; $l < 4; $l++){
+        for ($l = 0; $l < 4; $l++) {
             $gameMatrixColumnCounter = 0;
-            for ($j = 24 + $startPadding; $j < count($GamePixelRows[0])-20-$endPadding; $j = $j + $jSeparator) {
+            for ($j = 24 + $startPadding; $j < count($GamePixelRows[0]) - 20 - $endPadding; $j = $j + $jSeparator) {
                 $fruit = fruitsTypes[$gameMatrix[$gameMatrixRowCounter][$gameMatrixColumnCounter]];
                 for ($k = 0; $k < strlen($fruit[0]); $k++) {
-                    $GamePixelRows[$i+$l][$j + $k] = $fruit[$l][$k];
+                    $GamePixelRows[$i + $l][$j + $k] = $fruit[$l][$k];
                 }
                 $gameMatrixColumnCounter++;
             }
@@ -267,38 +276,39 @@ function drawInfo(array $GamePixelRows, int $balance, int $creditsWon, int $bet)
     $balanceText = "Balance = " . $balance;
     $creditsText = "Won = " . $creditsWon;
     $betText = "Your bet = " . $bet;
-    for ($i = 1; $i < count($GamePixelRows[0])-2; $i++){
-        $GamePixelRows[count($GamePixelRows)-5][$i] = " ";
+    for ($i = 1; $i < count($GamePixelRows[0]) - 2; $i++) {
+        $GamePixelRows[count($GamePixelRows) - 5][$i] = " ";
     }
-    for ($i = 0; $i < strlen($balanceText); $i++){
-        $GamePixelRows[count($GamePixelRows)-5][$i + 10] = str_split($balanceText)[$i];
+    for ($i = 0; $i < strlen($balanceText); $i++) {
+        $GamePixelRows[count($GamePixelRows) - 5][$i + 10] = str_split($balanceText)[$i];
     }
-    if($creditsWon != 0){
-        for ($i = 0; $i < strlen($creditsText); $i++){
-            $GamePixelRows[count($GamePixelRows)-5][$i + 45] = $creditsText[$i];
+    if ($creditsWon != 0) {
+        for ($i = 0; $i < strlen($creditsText); $i++) {
+            $GamePixelRows[count($GamePixelRows) - 5][$i + 45] = $creditsText[$i];
         }
     }
 
-    for ($i = 0; $i < strlen($betText); $i++){
-        $GamePixelRows[count($GamePixelRows)-5][$i + 75] = $betText[$i];
+    for ($i = 0; $i < strlen($betText); $i++) {
+        $GamePixelRows[count($GamePixelRows) - 5][$i + 75] = $betText[$i];
     }
     return $GamePixelRows;
 }
 
 
-function drawFrame(array $GamePixelRows): array{
-    $rowSplittersPos = [0,17,(count($GamePixelRows) - 1)];
-    $columnSplittersPos = [0,20,80,(count($GamePixelRows[0]) - 1)];
+function drawFrame(array $GamePixelRows): array
+{
+    $rowSplittersPos = [0, 17, (count($GamePixelRows) - 1)];
+    $columnSplittersPos = [0, 20, 80, (count($GamePixelRows[0]) - 1)];
     //rows
-    for ($i = 0; $i < count($GamePixelRows); $i++){
+    for ($i = 0; $i < count($GamePixelRows); $i++) {
         //columns
-        for ($j = 0; $j < count($GamePixelRows[0]); $j++){
-            if( $i != (count($GamePixelRows) - 1) &&
+        for ($j = 0; $j < count($GamePixelRows[0]); $j++) {
+            if ($i != (count($GamePixelRows) - 1) &&
                 $i > $rowSplittersPos[1] && $j > 0 &&
-                $j < (count($GamePixelRows[0]) - 1) ){
+                $j < (count($GamePixelRows[0]) - 1)) {
                 continue;
             }
-            if ((in_array($i, $rowSplittersPos)) || (in_array($j, $columnSplittersPos))){
+            if ((in_array($i, $rowSplittersPos)) || (in_array($j, $columnSplittersPos))) {
                 $GamePixelRows[$i][$j] = "%";
             }
 
@@ -311,31 +321,32 @@ function drawFrame(array $GamePixelRows): array{
 function drawDisplayPixels(array $PixelRows): void
 {
     system("clear");
-        foreach ($PixelRows as $pixelRow){
-            //shifting display to the right
-            array_unshift(
-                $pixelRow,
-                implode("",array_fill(0, leftPadding," ")));
-            //drawing display values
-            echo implode(
+    foreach ($PixelRows as $pixelRow) {
+        //shifting display to the right
+        array_unshift(
+            $pixelRow,
+            implode("", array_fill(0, leftPadding, " ")));
+        //drawing display values
+        echo implode(
                 "",
-                    $pixelRow) . PHP_EOL;
-        }
-
+                $pixelRow) . PHP_EOL;
     }
+
+}
+
 
 drawSplashScreen($splashScreenPixelRows);
 
 
-$gamePixelRows = drawInfo($gamePixelRows, (string)$balance, (string)$creditsWon, (string)$bet );
+$gamePixelRows = drawInfo($gamePixelRows, (string)$balance, (string)$creditsWon, (string)$bet);
 $gamePixelRows = drawFrame($gamePixelRows);
-$gamePixelRows = drawGameMatrix($gameMatrix, $gamePixelRows,false,-1);
-drawDisplayPixels($gamePixelRows);
+$gamePixelRows = drawGameMatrix($gameMatrix, $gamePixelRows, false, -1);
+//drawDisplayPixels($gamePixelRows);
 
 
-$balance = readline(str_repeat(" ", leftPadding)."How much money you wanna lose? (cents) : ");
+$balance = readline(str_repeat(" ", leftPadding) . "How much money you wanna lose? (cents) : ");
 
-$gamePixelRows = drawInfo($gamePixelRows, (string)$balance, (string)$creditsWon, (string)$bet );
+$gamePixelRows = drawInfo($gamePixelRows, (string)$balance, (string)$creditsWon, (string)$bet);
 drawDisplayPixels($gamePixelRows);
 
 
@@ -360,24 +371,24 @@ while (true) {
         $gamePixelRows = drawInfo($gamePixelRows, $balance, $creditsWon, $bet);
         drawDisplayPixels($gamePixelRows);
         if ($start) {
-            if($balance - $bet < 0 && $bet <= 10){
+            if ($balance - $bet < 0 && $bet <= 10) {
                 drawDisplayPixels($gamePixelRows);
-                echo str_repeat(" ", leftPadding) . "Not enough money! You were warned...". PHP_EOL;
+                echo str_repeat(" ", leftPadding) . "Not enough money! You were warned..." . PHP_EOL;
                 die;
             }
             $balance = $balance - $bet;
             break;
         }
     }
-    $gameMatrix = shuffleGameMatrix($gameMatrix,$gamePixelRows);
+    $gameMatrix = shuffleGameMatrix($gameMatrix, $gamePixelRows);
 
     $creditsWon = getWinnings($bet, $gameMatrix, 10);
 
     $gamePixelRows = drawFrame($gamePixelRows);
-    $gamePixelRows = drawGameMatrix($gameMatrix, $gamePixelRows,false,-1);
+    $gamePixelRows = drawGameMatrix($gameMatrix, $gamePixelRows, false, -1);
     $gamePixelRows = drawInfo($gamePixelRows, $balance, $creditsWon, $bet);
     drawDisplayPixels($gamePixelRows);
-    if($creditsWon != 0){
+    if ($creditsWon != 0) {
         readline(str_repeat(" ", leftPadding) . "Collect winnings!");
         $balance += $creditsWon;
         $creditsWon = 0;
